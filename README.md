@@ -1,7 +1,7 @@
 # ComicBookmarkManager
 A website to organize your bookmarks (comics) by tags rather than folders.
 
-This was in part to circumvent Cross-Origin Resource Sharing (CORS) and also in as stated above.
+This was in part to circumvent Cross-Origin Resource Sharing (CORS) and also stated above.
 
 Version: x0.1
 
