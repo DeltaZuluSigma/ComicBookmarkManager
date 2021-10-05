@@ -14,7 +14,7 @@ Version: x0.1
 ## Feature Explaination
 * *Chapter Number* would best describe the last/latest chapter of the comic you have read.
 * The several *Tags* that exist can be categorized as:
-  * 
+  * **Genre** such as:
     * *Casual* for Slice of Life and slow paced stories
     * *Adventure* for adventure and action type stories
     * *Romance* should be self-explanatory
