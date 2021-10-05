@@ -1,2 +1,29 @@
-# BookmarkManager
-A website to organize your bookmarks by tags rather than folders
+# ComicBookmarkManager
+A website to organize your bookmarks (comics) by tags rather than folders.
+
+This was in part to circumvent Cross-Origin Resource Sharing (CORS) and also stated above.
+
+Version: x0.1
+
+## Features
+- [x] Display bookmarks stored via XML (works for files under 110KB)
+- [x] Display select tags, chapter number, links w/ favicons
+- [ ] Display bookmark detailed view
+- [ ] Bookmark sorting
+
+## Feature Explaination
+* *Chapter Number* would best describe the last/latest chapter of the comic you have read.
+* The several *Tags* that exist can be categorized as:
+  * **Genre** such as:
+    * *Casual* for Slice of Life and slow paced stories
+    * *Adventure* for adventure and action type stories
+    * *Romance* should be self-explanatory
+  * **Status** such as:
+    * *Reading* if you're actively reading the story
+    * *Reviewing* if you're still considering if you'd want to continue reading a story
+    * *Paused* if you're taking a break from the story
+    * *New* if you're considering reading the story
+    * *MIA* if you enjoyed the story, but it hasn't updated in a while
+  * **Maturity** such as:
+    * *Suggestive* if the content is suggestive; i.e. excessive cleavage
+    * *Erotic* if the content involves more adult content; i.e. sex
