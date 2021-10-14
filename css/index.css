@@ -65,6 +65,10 @@ form table td {
 .ch_num {
 	margin: 3px;
 }
+.fm_links td {
+  	width: 33%;
+  	text-align: center;
+}
 #full_manga {
 	left: 0px;
   	margin-left: auto;
@@ -87,6 +91,9 @@ form table td {
   	position: fixed;
   	display: none;
 }
+#full_manga table {
+  	width: 100%;
+}
 #full_manga td {
 	/*border: 1px solid black;*/
   	padding: 3px;
@@ -106,7 +113,10 @@ form table td {
 #fm_titles {
 	vertical-align: top;
 }
-#fm_links td {
-  	width: 33%;
-  	text-align: center;
+#empty {
+  	width: 100%;
+  	height: 300px;
+}
+#empty h3 {
+  	margin: auto;
 }

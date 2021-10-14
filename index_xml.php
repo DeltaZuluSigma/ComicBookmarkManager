@@ -1,5 +1,141 @@
 <?php
-$xmldata = simplexml_load_file("files/bookmarks.xml") or die("Failed to load");
+// Extract XML file
+$xmldata = simplexml_load_file("files/bmk_sample.xml") or die("Failed to load");
+
+// FUNCTIONS *********************************************************************
+/* switch_label Function
+   Desc: Makes the label/tag switch structure more accessible/modular
+   Param: tag - Label/Tag name
+   Return: respective HTML label/tag element
+*/
+function switch_label($tag) {
+  switch (strtolower($tag)) {
+    case "casual":
+    case "adventure":
+    case "romance":
+      return "<span class=\"genre_label\">" . $tag . "</span> ";
+    case "suggestive":
+    case "erotic":
+      return "<span class=\"maturity_label\">" . $tag . "</span> ";
+    case "paused":
+    case "reading":
+    case "reviewing":
+    case "new":
+      return "<span class=\"status_label\">" . $tag . "</span> ";
+    case "mia":
+      return "<span class=\"status_label\">" . strtoupper($tag) . "</span> ";
+    default:
+      return "<span class=\"maturity_label\">Error</span> ";
+  }
+}
+/* switch_link Function
+   Desc: Makes the link & favicon switch structure more accessible/modular
+   Param: link - Link XML element
+   Return: respective HTML link & favicon elements
+*/
+function switch_link($link) {
+  switch ($link['site']) {
+    case "MangaDex":
+      return "<td>\n<img src=\"css/images/md_favicon.ico\" alt=\"" . $link['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $link . "\" target=\"_blank\">" . $link['site'] . "</a>\n</td>\n";
+      break;
+    case "Manga Sushi":
+      return "<td>\n<img src=\"https://mangasushi.net/wp-content/uploads/2020/11/cropped-MS_LOGO-32x32.png\" alt=\"" . $link['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $link . "\" target=\"_blank\">" . $link['site'] . "</a>\n</td>\n";
+    case "Luminous Scans":
+      return "<td>\n<img src=\"https://www.luminousscans.com/fypadsuh/2021/04/cropped-logo-32x32.png\" alt=\"" . $link['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $link . "\" target=\"_blank\">" . $link['site'] . "</a>\n</td>\n";
+    case "MangaKakalot":
+      return "<td>\n<img src=\"https://mangakakalot.com/favicon.ico\" alt=\"" . $link['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $link . "\" target=\"_blank\">" . $link['site'] . "</a>\n</td>\n";
+    case "Bato.To":
+      return "<td>\n<img src=\"https://static.animemark.com/img/batoto/favicon.ico?v0\" alt=\"" . $link['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $link . "\" target=\"_blank\">" . $link['site'] . "</a>\n</td>\n";
+    case "WhimSubs":
+      return "<td>\n<img src=\"https://whimsubs.xyz/static/img/logo.png\" alt=\"" . $link['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $link . "\" target=\"_blank\">" . $link['site'] . "</a>\n</td>\n";
+    case "LHTranslation":
+      return "<td>\n<img src=\"css/images/lht_favicon.ico\" alt=\"" . $link['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $link . "\" target=\"_blank\">" . $link['site'] . "</a>\n</td>\n";
+    case "Manganato":
+      return "<td>\n<img src=\"https://readmanganato.com/favicon.png\" alt=\"" . $link['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $link . "\" target=\"_blank\">" . $link['site'] . "</a>\n</td>\n";
+    case "ManhuaPlus":
+      return "<td>\n<img src=\"https://manhuaplus.com/wp-content/uploads/2020/07/cropped-manhua-vuong-den-1-32x32.jpg\" alt=\"" . $link['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $link . "\" target=\"_blank\">" . $link['site'] . "</a>\n</td>\n";
+    case "Flame Scans":
+      return "<td>\n<img src=\"https://flamescans.org/eternalflame/2021/03/cropped-fds-1-32x32.png\" alt=\"" . $link['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $link . "\" target=\"_blank\">" . $link['site'] . "</a>\n</td>\n";
+    case "Reaper Scans":
+      return "<td>\n<img src=\"css/images/rs_favicon.png\" alt=\"" . $link['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $link . "\" target=\"_blank\">" . $link['site'] . "</a>\n</td>\n";
+    case "1st Kiss Manga":
+      return "<tr><td>\n<img src=\"css/images/1km_favicon.png\" alt=\"" . $link['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $link . "\" target=\"_blank\">" . $link['site'] . "</a>\n</td>\n";
+    case "Asura Scans":
+      return "<td>\n<img src=\"https://www.asurascans.com/wp-content/uploads/2021/03/cropped-Group_1-1-32x32.png\" alt=\"" . $link['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $link . "\" target=\"_blank\">" . $link['site'] . "</a>\n</td>\n";
+    case "Nani? Scans":
+      return "<td>\n<img src=\"css/images/ns_favicon.png\" alt=\"" . $link['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $link . "\" target=\"_blank\">" . $link['site'] . "</a>\n</td>\n";
+    case "Tritinia Scans":
+      return "<td>\n<img src=\"css/images/ts_favicon.png\" alt=\"" . $link['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $link . "\" target=\"_blank\">" . $link['site'] . "</a>\n</td>\n";
+    case "247 Manga":
+      return "<td>\n<img src=\"https://247manga.com/wp-content/uploads/2021/05/cropped-247manga-32x32.png\" alt=\"" . $link['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $link . "\" target=\"_blank\">" . $link['site'] . "</a>\n</td>\n";
+    case "Kun Manga":
+      return "<td>\n<img src=\"https://kunmanga.com/wp-content/uploads/2021/06/cropped-kun-favicon-32x32.png\" alt=\"" . $link['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $link . "\" target=\"_blank\">" . $link['site'] . "</a>\n</td>\n";
+    case "Immortal Updates":
+      return "<td>\n<img src=\"https://immortalupdates.com/wp-content/uploads/2017/10/SMALL-LOGO.png\" alt=\"" . $link['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $link . "\" target=\"_blank\">" . $link['site'] . "</a>\n</td>\n";
+    case "Gourmet Scans":
+      return "<tr><td>\n<img src=\"css/images/gs_favicon.png\" alt=\"" . $link['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $link . "\" target=\"_blank\">" . $link['site'] . "</a>\n</td>\n";
+    case "Reset Scans":
+      return "<td>\n<img src=\"css/images/res_favicon.png\" alt=\"" . $link['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $link . "\" target=\"_blank\">" . $link['site'] . "</a>\n</td>\n";
+    case "Isekai Scan":
+      return "<td>\n<img src=\"css/images/is_favicon.png\" alt=\"" . $link['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $link . "\" target=\"_blank\">" . $link['site'] . "</a>\n</td>\n";
+    case "Manga Great":
+      return "<td>\n<img src=\"css/images/mg_favicon.png\" alt=\"" . $link['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $link . "\" target=\"_blank\">" . $link['site'] . "</a>\n</td>\n";
+    case "Galaxy Degen Scans":
+      return "<td>\n<img src=\"https://gdegenscans.xyz/wp-content/uploads/2021/03/cropped-favicon-32x32.png\" alt=\"" . $link['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $link . "\" target=\"_blank\">" . $link['site'] . "</a>\n</td>\n";
+    case "Cat Manga":
+      return "<td>\n<img src=\"https://images.catmanga.org/favicon.png\" alt=\"" . $link['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $link . "\" target=\"_blank\">" . $link['site'] . "</a>\n</td>\n";
+    case "WordPress":
+      return "<td>\n<img src=\"https://s0.wp.com/i/favicon.ico\" alt=\"" . $link['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $link . "\" target=\"_blank\">" . $link['site'] . "</a>\n</td>\n";
+    default:
+      return "<td>\n<img src=\"css/images/not-available.png\" alt=\"None\" class=\"sicon\"/>\n<a href=\"" . $link . "\" target=\"_blank\">" . $link['site'] . "</a>\n</td>\n";
+  }
+}
+/* search Function
+   Desc: Apply the search filters accordingly to each comic/manga
+   Param: A comic object
+   Return: boolean
+*/
+function search($comic) {
+  // Search conducted condition
+  if (isset($_POST['gstatus']) && !empty($_POST['gstatus']) && isset($_POST['mia']) && !empty($_POST['mia']) && isset($_POST['pause']) && !empty($_POST['pause'])) {
+    // Searched label variable
+    $label = $_POST['gstatus'];
+    // Searched MIA param variable
+    $mia_opt = ($_POST['mia'] == "exc")?false:true;
+    // Searched Paused param variable
+    $pause_opt = ($_POST['pause'] == "inc")?true:false;
+    // Manga's labels
+    $all_lbls = explode(',',$comic->tags);
+    
+    // Manga name search conducted condition
+    if (isset($_POST['mname']) && !empty($_POST['mname'])) {
+      // Searched name variable
+      $srch_name = strtolower($_POST['mname']);
+      
+      // Primary title condition
+      if (strpos(strtolower($comic->name),$srch_name) !== false) { return true; }
+      // Foreach Loop through alternative titles to check condition
+      foreach ($comic->alt as $altname) {
+        if (strpos(strtolower($altname),$srch_name) !== false) { return true; }
+      }
+      
+      // Fail Catch Case
+      return false;
+    }
+    
+    // Label/Tag condition
+    if ($label == "all" || in_array($label,$all_lbls)) {
+      // MIA & paused conditions
+      if ($mia_opt && $pause_opt) { return true; }
+      else if (!$mia_opt && !in_array("mia",$all_lbls) && $pause_opt) { return true; }
+      else if ($mia_opt && !$pause_opt && !in_array("paused",$all_lbls)) { return true; }
+      else if (!$mia_opt && !in_array("mia",$all_lbls) && !$pause_opt && !in_array("paused",$all_lbls)) { return true; }
+    }
+    
+    // Fail Catch Case
+    return false;
+  }
+}
 ?>
 <html>
   <head>
@@ -7,11 +143,25 @@ $xmldata = simplexml_load_file("files/bookmarks.xml") or die("Failed to load");
 	<link rel="icon" type="image/png" href="css/images/favicon.ico"/>
     <!--Bootstrap & RWD-->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="stylesheet" href="css/bootstrap.min.css">
-    <script src="js/jquery-3.5.1.min.js"></script>
-    <script src="js/bootstrap.min.js"></script>
+	<link rel="stylesheet" href="https://zhou16g.myweb.cs.uwindsor.ca/bootstrap.min.css">
+    <script src="https://zhou16g.myweb.cs.uwindsor.ca/jquery-3.5.1.min.js"></script>
+    <script src="https://zhou16g.myweb.cs.uwindsor.ca/bootstrap.min.js"></script>
 	<!--Style Sheets & JS file-->
 	<link rel="stylesheet" href="css/index.css">
+    <?php
+    // Full detail and manga ID style/initial check
+    if (isset($_GET['full']) && isset($_GET['id']) && !empty($_GET['full']) && !empty($_GET['full'])) {
+      $full = true;
+      $id = $_GET['id'];
+      echo <<<_END
+      <style>
+        #fm_catch, #full_manga {
+          display: block;
+        }
+      </style>
+_END;
+    }
+    ?>
   </head>
   <body>
     <!--Website Head-->
@@ -20,7 +170,8 @@ $xmldata = simplexml_load_file("files/bookmarks.xml") or die("Failed to load");
       <h1>Manga Bookmarks</h1>
     </header>
 	<nav>
-	  <form method="get">
+      <!--Bookmark Search Form-->
+	  <form method="post">
 	    <label for="mname">Manga Name:</label>
         <input type="text" id="mname" class="form-control form-control-sm" name="mname"/>
         <br>
@@ -38,10 +189,12 @@ $xmldata = simplexml_load_file("files/bookmarks.xml") or die("Failed to load");
                 <label for="romance">Romance</label>
               </span>
               <span id="status">
-                <input type="radio" id="review" name="gstatus" value="review"/>
+                <input type="radio" id="review" name="gstatus" value="reviewing"/>
                 <label for="review"><em>Reviewing</em></label>
                 <input type="radio" id="reading" name="gstatus" value="reading"/>
                 <label for="reading"><em>Reading</em></label>
+                <input type="radio" id="new" name="gstatus" value="new"/>
+                <label for="new"><em>New</em></label>
               </span>
             </td>
             <td>
@@ -68,202 +221,152 @@ $xmldata = simplexml_load_file("files/bookmarks.xml") or die("Failed to load");
       <table>
         <tr>
           <?php
-          $mcount = $xmldata->count();
+          // Empty table boolean
+          $empty_tbl = true;
+          // Single row boolean
+          $srow = true;
+          // Count manga per row
           $rownum = 0;
-          
+
+          // Foreach Loop through all manga to print/display
           foreach ($xmldata->comic as $comic) {
-            echo <<<_END
-            <td class="ind_manga">
-            <a href="?full=1&id={$comic->attributes()}" class="sltctr">
-              <img src="{$comic->cover}" alt="{$comic->name}" class="poster"/>
-              <p>{$comic->name}</p>
-            </a>
-            <div class="lbl_btm">
-_END;
-            $atags = explode(',',ucwords($comic->tags,","));
-            $atags_count = count($atags);
-            $labelnum = 0;
-            $tlabels = "";
-            
-            foreach ($atags as $tag) {
-              switch (strtolower($tag)) {
-                case "casual":
-                case "adventure":
-                case "romance":
-                  $tlabels .= "<span class=\"genre_label\">" . $tag . "</span> ";
-                  break;
-                case "suggestive":
-                case "erotic":
-                  $tlabels .= "<span class=\"maturity_label\">" . $tag . "</span> ";
-                  break;
-                case "paused":
-                case "reading":
-                case "reviewing":
-                case "new":
-                  $tlabels .= "<span class=\"status_label\">" . $tag . "</span> ";
-                  break;
-                case "mia":
-                  $tlabels .= "<span class=\"status_label\">" . strtoupper($tag) . "</span> ";
-                  break;
-                default:
-                  $tlabels .= "<span class=\"maturity_label\">Error</span> ";
-                  break;
+            if (search($comic)) {
+              $rownum++;
+              // Manga line spacing conditions
+              if ($rownum > 3) {
+                echo "</tr>\n<tr>";
+                $rownum = 1;
+                $srow = false;
               }
               
-              $labelnum++;
-              if ($atags_count > 0 && $labelnum >= 3) {
-                $tlabels .= "</div>\n<div class=\"lbl_btm\">";
-                $atags_count -= 3;
-                $labelnum = 0;
+              echo <<<_END
+                <td class="ind_manga">
+                <a href="?full=1&id={$comic->attributes()}" class="sltctr">
+                  <img src="{$comic->cover}" alt="{$comic->name}" class="poster"/>
+                  <p>{$comic->name}</p>
+                </a>
+                <div class="lbl_btm">
+_END;
+              // Extract all labels
+              $atags = explode(',',ucwords($comic->tags,","));
+              // Count number of labels
+              $atags_count = count($atags);
+              // Count labels per line
+              $labelnum = 0;
+              // Cumulative labels variable
+              $tlabels = "";
+
+              // Foreach Loop through all labels to cumulate
+              foreach ($atags as $tag) {
+                // Identify label
+                $tlabels .= switch_label($tag);
+
+                $labelnum++;
+                // Labels line spacing condition
+                if ($atags_count > 0 && $labelnum >= 3) {
+                  $tlabels .= "</div>\n<div class=\"lbl_btm\">";
+                  $atags_count -= 3;
+                  $labelnum = 0;
+                }
               }
-              else if ($atags_count <= 0) {
-                echo "</div>\n";
-              }
-            }
-            
-            echo $tlabels . "</div>\n";
-            echo "<p class=\"ch_num\"><strong>Chapter: </strong>" . $comic->chapter . "</p>\n<table>";
-            
-            foreach ($comic->link as $clink) {
-              switch ($clink['site']) {
-                case "MangaDex":
-                  echo "<tr><td>\n<img src=\"https://mangadex.org/favicon.ico\" alt=\"" . $clink['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $clink . "\">" . $clink['site'] . "</a>\n</td></tr>\n";
-                  break;
-                case "Manga Sushi":
-                  echo "<tr><td>\n<img src=\"https://mangasushi.net/wp-content/uploads/2020/11/cropped-MS_LOGO-32x32.png\" alt=\"" . $clink['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $clink . "\">" . $clink['site'] . "</a>\n</td></tr>\n";
-                  break;
-                case "Luminous Scans":
-                  echo "<tr><td>\n<img src=\"https://www.luminousscans.com/fypadsuh/2021/04/cropped-logo-32x32.png\" alt=\"" . $clink['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $clink . "\">" . $clink['site'] . "</a>\n</td></tr>\n";
-                  break;
-                case "Setsu Scans":
-                  echo "<tr><td>\n<img src=\"https://i2.wp.com/setsuscans.com/wp-content/uploads/2021/04/cropped-no.png?fit=32%2C32&\" alt=\"" . $clink['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $clink . "\">" . $clink['site'] . "</a>\n</td></tr>\n";
-                  break;
-                case "MangaKakalot":
-                  echo "<tr><td>\n<img src=\"https://mangakakalot.com/favicon.ico\" alt=\"" . $clink['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $clink . "\">" . $clink['site'] . "</a>\n</td></tr>\n";
-                  break;
-                case "Bato.To":
-                  echo "<tr><td>\n<img src=\"https://static.animemark.com/img/batoto/favicon.ico?v0\" alt=\"" . $clink['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $clink . "\">" . $clink['site'] . "</a>\n</td></tr>\n";
-                  break;
-                case "WhimSubs":
-                  echo "<tr><td>\n<img src=\"https://whimsubs.xyz/static/img/logo.png\" alt=\"" . $clink['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $clink . "\">" . $clink['site'] . "</a>\n</td></tr>\n";
-                  break;
-                case "LHTranslation":
-                  echo "<tr><td>\n<img src=\"css/images/lht_favicon.ico\" alt=\"" . $clink['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $clink . "\">" . $clink['site'] . "</a>\n</td></tr>\n";
-                  break;
-                case "Manganato":
-                  echo "<tr><td>\n<img src=\"https://readmanganato.com/favicon.png\" alt=\"" . $clink['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $clink . "\">" . $clink['site'] . "</a>\n</td></tr>\n";
-                  break;
-                case "ManhuaPlus":
-                  echo "<tr><td>\n<img src=\"https://manhuaplus.com/wp-content/uploads/2020/07/cropped-manhua-vuong-den-1-32x32.jpg\" alt=\"" . $clink['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $clink . "\">" . $clink['site'] . "</a>\n</td></tr>\n";
-                  break;
-                case "Flame Scans":
-                  echo "<tr><td>\n<img src=\"https://flamescans.org/eternalflame/2021/03/cropped-fds-1-32x32.png\" alt=\"" . $clink['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $clink . "\">" . $clink['site'] . "</a>\n</td></tr>\n";
-                  break;
-                case "Reaper Scans":
-                  echo "<tr><td>\n<img src=\"css/images/rs_favicon.png\" alt=\"" . $clink['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $clink . "\">" . $clink['site'] . "</a>\n</td></tr>\n";
-                  break;
-                case "1st Kiss Manga":
-                  echo "<tr><td>\n<img src=\"https://1stkissmanga.io/favicon.ico\" alt=\"" . $clink['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $clink . "\">" . $clink['site'] . "</a>\n</td></tr>\n";
-                  break;
-                case "Leviatan Scans":
-                  echo "<tr><td>\n<img src=\"css/images/ls_favicon.png\" alt=\"" . $clink['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $clink . "\">" . $clink['site'] . "</a>\n</td></tr>\n";
-                  break;
-                case "Asura Scans":
-                  echo "<tr><td>\n<img src=\"https://www.asurascans.com/wp-content/uploads/2021/03/cropped-Group_1-1-32x32.png\" alt=\"" . $clink['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $clink . "\">" . $clink['site'] . "</a>\n</td></tr>\n";
-                  break;
-                case "Nani? Scans":
-                  echo "<tr><td>\n<img src=\"https://naniscans.com/assets/icon.png\" alt=\"" . $clink['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $clink . "\">" . $clink['site'] . "</a>\n</td></tr>\n";
-                  break;
-                case "Tritinia Scans":
-                  echo "<tr><td>\n<img src=\"https://tritinia.com/favicon.ico\" alt=\"" . $clink['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $clink . "\">" . $clink['site'] . "</a>\n</td></tr>\n";
-                  break;
-                case "247 Manga":
-                  echo "<tr><td>\n<img src=\"https://247manga.com/wp-content/uploads/2021/05/cropped-247manga-32x32.png\" alt=\"" . $clink['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $clink . "\">" . $clink['site'] . "</a>\n</td></tr>\n";
-                  break;
-                case "Kun Manga":
-                  echo "<tr><td>\n<img src=\"https://kunmanga.com/wp-content/uploads/2021/06/cropped-kun-favicon-32x32.png\" alt=\"" . $clink['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $clink . "\">" . $clink['site'] . "</a>\n</td></tr>\n";
-                  break;
-                case "Immortal Updates":
-                  echo "<tr><td>\n<img src=\"https://immortalupdates.com/wp-content/uploads/2017/10/SMALL-LOGO.png\" alt=\"" . $clink['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $clink . "\">" . $clink['site'] . "</a>\n</td></tr>\n";
-                  break;
-                case "Gourmet Scans":
-                  echo "<tr><td>\n<img src=\"css/images/gs_favicon.png\" alt=\"" . $clink['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $clink . "\">" . $clink['site'] . "</a>\n</td></tr>\n";
-                  break;
-                case "Reset Scans":
-                  echo "<tr><td>\n<img src=\"css/images/res_favicon.png\" alt=\"" . $clink['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $clink . "\">" . $clink['site'] . "</a>\n</td></tr>\n";
-                  break;
-                case "Isekai Scan":
-                  echo "<tr><td>\n<img src=\"css/images/is_favicon.png\" alt=\"" . $clink['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $clink . "\">" . $clink['site'] . "</a>\n</td></tr>\n";
-                  break;
-                case "Manga Great":
-                  echo "<tr><td>\n<img src=\"https://mangagreat.com/wp-content/uploads/2017/10/cropped-cropped-mangagreat-e1610206927661-32x32.png\" alt=\"" . $clink['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $clink . "\">" . $clink['site'] . "</a>\n</td></tr>\n";
-                  break;
-                case "Galaxy Degen Scans":
-                  echo "<tr><td>\n<img src=\"https://gdegenscans.xyz/wp-content/uploads/2021/03/cropped-favicon-32x32.png\" alt=\"" . $clink['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $clink . "\">" . $clink['site'] . "</a>\n</td></tr>\n";
-                  break;
-                case "Cat Manga":
-                  echo "<tr><td>\n<img src=\"https://images.catmanga.org/favicon.png\" alt=\"" . $clink['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $clink . "\">" . $clink['site'] . "</a>\n</td></tr>\n";
-                  break;
-                case "WordPress":
-                  echo "<tr><td>\n<img src=\"https://s0.wp.com/i/favicon.ico\" alt=\"" . $clink['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $clink . "\">" . $clink['site'] . "</a>\n</td></tr>\n";
-                  break;
-                default:
-                  echo "<tr><td>\n<img src=\"css/images/not-available.png\" alt=\"None\" class=\"sicon\"/>\n<a href=\"" . $clink . "\">" . $clink['site'] . "</a>\n</td></tr>\n";
-                  break;
-              }
-            }
-            
-            echo "</table></td>";
-            
-            $rownum++;
-            if ($mcount > 0 && $rownum >= 3) {
-              echo "</tr>\n<tr>";
-              $mcount -= 3;
-              $rownum = 0;
-            }
-            else if ($mcount <= 0) {
-              echo "</tr>\n";
+
+              // Close/print/display 'tlabels'
+              echo $tlabels . "</div>\n";
+              echo "<p class=\"ch_num\"><strong>Chapter: </strong>" . $comic->chapter . "</p>\n<table>";
+
+              // Cumulative list links variable
+              $links = "";
+              // Foreach Loop through all links to print/display
+              foreach ($comic->link as $clink) { $links .= "<tr>\n" . switch_link($clink) . "</tr>\n"; }
+              // Close/print/display 'links'
+              echo $links . "</table></td>";
+
+              $empty_tbl = false;
             }
           }
+          
+          // Close table list
+          if ($rownum < 4 && !$empty_tbl) {
+            if ($srow) {
+              for (; $rownum < 3; $rownum++) { echo "<td class=\"ind_manga\"></td>\n"; }
+            }
+            echo "</tr>\n";
+          }
+          // No result catch
+          if ($empty_tbl) { echo "<td id=\"empty\"><h3>No Results. Search for Something Else.</h3></td></tr>\n"; }
           ?>
       </table>
     </section>
     <!--Selected Manga-->
-    <div id="fm_catch" onclick="closeManga(); return false;"></div>
+    <!--*Full detail view close catch*-->
+    <div id="fm_catch" onclick="location.href='index_xml.php'; return false;"></div>
     <div id="full_manga">
       <table>
-        <tr>
-          <td id="fm_poster">
-      		<img src="https://uploads.mangadex.org/covers/1b0c80ec-c8db-43c1-840c-6d126c78d09f/14f185d6-7782-473c-97ea-9c2ddfedbde9.jpg" alt="Shijou Saikyou no Mahou Kenshi, F Rank Boukensha ni Tensei Suru" class="poster"/>
-          </td>
-          <td colspan="2" id="fm_titles">
-            <strong>Primary Title:</strong> Shijou Saikyou no Mahou Kenshi, F Rank Boukensha ni Tensei Suru <br>
-            <strong>Alternate Title:</strong> The Strongest Magical Swordsman Ever Reborn as an F-Rank Adventurer
-          </td>
-        </tr>
-        <tr>
-          <td colspan="3" id="fm_descriptors">
-            <br>
-            <span class="genre_label">Casual</span> <span class="genre_label">Adventure</span>
-            <br><br>
-            <p class="ch_num"><strong>Chapter: </strong>47</p>
-            <br>
-          </td>
-        </tr>
-        <tr id="fm_links">
-          <td>
-            <img src="https://mangadex.org/favicon.ico" alt="MangaDex" class="sicon"/>
-            <a href="https://mangadex.org/title/1b0c80ec-c8db-43c1-840c-6d126c78d09f">MangaDex</a>
-          </td>
-          <td>
-            <img src="https://mangasushi.net/wp-content/uploads/2020/11/cropped-MS_LOGO-32x32.png" alt="Manga Sushi" class="sicon"/>
-            <a href="https://mangasushi.net/manga/shijou-saikyou-no-mahou-kenshi-f-rank-boukensha-ni-tensei-suru-1879/">Manga Sushi</a>
-          </td>
-          <td>
-            
-          </td>
-        </tr>
-      </table>
+        <?php
+        // Full detail to-display check
+        if (full) {
+          echo "<tr><td id=\"fm_poster\">\n";
+          // Foreach Loop through all manga to find specific manga and to print/display
+          foreach ($xmldata->comic as $comic) {
+            if ($comic['id'] == $id) {
+              echo <<<_END
+                <img src="{$comic->cover}" alt="{$comic->name}" class="poster"/>
+              </td>
+              <td colspan="2" id="fm_titles">
+                <strong>Primary Title:</strong> {$comic->name} <br>
+_END;
+              // Foreach Loop through all alternative manga titles/names to print/display
+              foreach ($comic->alt as $alts) { echo "<strong>Alternate Title:</strong> " . $alts . " <br>\n"; }
+              
+              // Extract all labels 
+              $atags = explode(',',ucwords($comic->tags,","));
+              // Cumulative labels variable
+              $tlabels = "";
+              // Foreach Loop through all labels to cumulate
+              foreach ($atags as $tag) { $tlabels .= switch_label($tag); }
+              echo <<<_END
+              </td>
+            </tr>
+            <tr>
+              <td colspan="3" id="fm_descriptors">
+                <br>
+                {$tlabels}
+                <br><br>
+                <p class="ch_num"><strong>Chapter: </strong>{$comic->chapter}</p>
+                <br>
+              </td>
+            </tr>
+_END;
+              // Cumulative list links variable
+              $links = "<tr class=\"fm_links\">";
+              // Count number of links
+              $link_count = $comic->link->count();
+              // Count links per row
+              $link_num = 0;
+              
+              // Foreach Loop through all links to print/display
+        	  foreach ($comic->link as $clink) {
+                // Identify link
+                $links .= switch_link($clink);
+                
+                $link_num++;
+                // Link line spacing conditions
+                if ($link_count > 3 && $link_num >= 3) {
+                  $links .= "</tr>\n<tr class=\"fm_links\">";
+                  $link_count -= 3;
+                  $link_num = 0;
+                }
+                else if ($link_count <= 3 && $link_count == $link_num) {
+                  for (; $link_num < 3; $link_num++) { $links .= "<td></td>\n"; }
+                  echo $links . "</tr>\n";
+                }
+              }
+              break;
+            }
+          }
+        }
+        ?>
+        </table>
     </div>
     <!--Website Footer-->
     <br>
