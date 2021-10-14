@@ -8,6 +8,7 @@ Version: x0.2
 - [x] Display select tags, chapter number, links w/ favicons
 - [x] Display bookmark detailed view
 - [x] Bookmark tag sorting
+- [ ] Saved search
 - [ ] Pages (Pagination) or something similar
 - [ ] SQL website version for more storage
 - [ ] Comic/Manga site scrapper (most likely not)
