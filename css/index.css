@@ -33,9 +33,11 @@ form table td {
 .ind_manga td {
   	text-align: center;
 }
-.sltctr:link, .sltctr:visited, .sltctr:hover, .sltctr:active {
-  	color: #000000;
-  	text-decoration: none;
+.ind_manga article {
+  	display: none;
+}
+.clickarea {
+  	cursor: pointer;
 }
 .poster {
 	width: 200px;
