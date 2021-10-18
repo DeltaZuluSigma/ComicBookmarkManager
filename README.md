@@ -1,14 +1,14 @@
 # ComicBookmarkManager
 A website to organize your bookmarks (comics) by tags rather than folders; this was made in part to circumvent Cross-Origin Resource Sharing (CORS) such that a website can read and write to and from an XML file.
 
-Version: x0.2
+Version: x0.3
 
 ## Features
 - [x] Display bookmarks stored via XML (works for files under 110KB)
 - [x] Display select tags, chapter number, links w/ favicons
 - [x] Display bookmark detailed view
 - [x] Bookmark tag sorting
-- [ ] Saved search
+- [x] Saved search
 - [ ] Pages / Pagination
 - [ ] Editable bookmarks
 - [ ] SQL website version for more storage
