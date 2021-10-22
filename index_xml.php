@@ -2,6 +2,17 @@
 // Extract XML file
 $xmldata = simplexml_load_file("files/bookmarks.xml") or die("Failed to load");
 
+// Constants
+define("DISPLAY",24);
+
+// Search Query Array
+$srch = ["tag" => "all","mia" => false,"pause" => false,"page" => 1];
+if (isset($_POST['gstatus']) && !empty($_POST['gstatus'])) { $srch['tag'] = $_POST['gstatus']; }
+if (isset($_POST['mia']) && !empty($_POST['mia'])) { $srch['mia'] = ($_POST['mia'] == "exc")?false:true; }
+if (isset($_POST['pause']) && !empty($_POST['pause'])) { $srch['pause'] = ($_POST['pause'] == "inc")?false:true; }
+if (isset($_POST['mname']) && !empty($_POST['mname'])) { $srch['mname'] = $_POST['mname']; }
+if (isset($_POST['page']) && !empty($_POST['page'])) { $srch['page'] = $_POST['page']; }
+
 // FUNCTIONS *********************************************************************
 /**switch_label Function*************************************************
    Desc: Makes the label/tag switch structure more accessible/modular
@@ -90,28 +101,17 @@ function switch_link($link) {
    Param: A comic object
    Return: boolean
 */
-function search($comic) {
-  // Search conducted condition
-  if (isset($_POST['gstatus']) && !empty($_POST['gstatus']) && isset($_POST['mia']) && !empty($_POST['mia']) && isset($_POST['pause']) && !empty($_POST['pause'])) {
-    // Searched label variable
-    $label = $_POST['gstatus'];
-    // Searched MIA param variable
-    $mia_opt = ($_POST['mia'] == "exc")?false:true;
-    // Searched Paused param variable
-    $pause_opt = ($_POST['pause'] == "inc")?true:false;
+function search($comic,$srch) {
     // Manga's labels
     $all_lbls = explode(',',$comic->tags);
     
     // Manga name search conducted condition
-    if (isset($_POST['mname']) && !empty($_POST['mname'])) {
-      // Searched name variable
-      $srch_name = strtolower($_POST['mname']);
-      
+    if ($srch['mname']) {
       // Primary title condition
-      if (strpos(strtolower($comic->name),$srch_name) !== false) { return true; }
+      if (strpos(strtolower($comic->name),$srch['mname']) !== false) { return true; }
       // Foreach Loop through alternative titles to check condition
       foreach ($comic->alt as $altname) {
-        if (strpos(strtolower($altname),$srch_name) !== false) { return true; }
+        if (strpos(strtolower($altname),$srch['mname']) !== false) { return true; }
       }
       
       // Fail Catch Case
@@ -119,17 +119,16 @@ function search($comic) {
     }
     
     // Label/Tag condition
-    if ($label == "all" || in_array($label,$all_lbls)) {
+    if ($srch['tag'] == "all" || in_array($srch['tag'],$all_lbls)) {
       // MIA & paused conditions
-      if ($mia_opt && $pause_opt) { return true; }
-      else if (!$mia_opt && !in_array("mia",$all_lbls) && $pause_opt) { return true; }
-      else if ($mia_opt && !$pause_opt && !in_array("paused",$all_lbls)) { return true; }
-      else if (!$mia_opt && !in_array("mia",$all_lbls) && !$pause_opt && !in_array("paused",$all_lbls)) { return true; }
+      if ($srch['mia'] && $srch['pause']) { return true; }
+      else if (!$srch['mia'] && !in_array("mia",$all_lbls) && $srch['pause']) { return true; }
+      else if ($srch['mia'] && !$srch['pause'] && !in_array("paused",$all_lbls)) { return true; }
+      else if (!$srch['mia'] && !in_array("mia",$all_lbls) && !$srch['pause'] && !in_array("paused",$all_lbls)) { return true; }
     }
     
     // Fail Catch Case
     return false;
-  }
 }
 /**exp_json Function******************************************************
    Desc: Extract all comic/manga info into JSON string
@@ -160,26 +159,12 @@ function exp_json($comic,$tags) {
 	<link rel="icon" type="image/png" href="css/images/favicon.ico"/>
     <!--Bootstrap & RWD-->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="stylesheet" href="css/bootstrap.min.css">
+	<link rel="stylesheet" href="css/bootstrap.min.css" />
     <script src="js/jquery-3.5.1.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
 	<!--Style Sheets & JS file-->
-	<link rel="stylesheet" href="css/index.css">
-    	<script src="js/index.js"></script>
-    <?php
-    // Full detail and manga ID style/initial check
-    if (isset($_GET['full']) && isset($_GET['id']) && !empty($_GET['full']) && !empty($_GET['full'])) {
-      $full = true;
-      $id = $_GET['id'];
-      echo <<<_END
-      <style>
-        #fm_catch, #full_manga {
-          display: block;
-        }
-      </style>
-_END;
-    }
-    ?>
+	<link rel="stylesheet" href="css/index.css" />
+    <script src="js/index.js"></script>
   </head>
   <body>
     <!--Website Head-->
@@ -189,25 +174,15 @@ _END;
     </header>
 	<nav>
       <!--Bookmark Search Form-->
-      <?php
-      if (isset($_POST['gstatus']) && !empty($_POST['gstatus']) && isset($_POST['mia']) && !empty($_POST['mia']) && isset($_POST['pause']) && !empty($_POST['pause'])) {
-        // Searched label variable
-        $label = $_POST['gstatus'];
-        // Searched MIA param variable
-        $mia = ($_POST['mia'] == "exc")?false:true;
-        // Searched Paused param variable
-        $pause = ($_POST['pause'] == "inc")?false:true;
-      }
-      ?>
 	  <form method="post">
 	    <label for="mname">Manga Name:</label>
-        <input type="text" id="mname" class="form-control form-control-sm" name="mname"/>
+        <input type="text" id="mname" class="form-control form-control-sm" name="mname" <?php if (srch['mname']) { echo "value=\"" . $srch['mname'] . "\""; } ?> />
         <br>
         <table>
           <tr>
             <td>
               <?php
-              switch ($label) {
+              switch ($srch['tag']) {
                 case "casual": $cckd = " checked"; break;
                 case "adventure": $adckd = " checked"; break;
                 case "romance": $rockd = " checked"; break;
@@ -242,7 +217,7 @@ _END;
               <span id="suspension">
                 <select name="mia" id="mia">
                   <?php
-                  if ($mia) {
+                  if ($srch['mia']) {
                     echo <<<_END
                   <option value="inc" selected>Include MIA</option>
                   <option value="exc">Exclude MIA</option>
@@ -258,7 +233,7 @@ _END;
                 </select>
                 <select name="pause" id="pause">
                   <?php
-                  if ($pause) {
+                  if ($srch['pause']) {
                     echo <<<_END
                   <option value="inc">Include Paused</option>
                   <option value="exc" selected>Exclude Paused</option>
@@ -275,8 +250,27 @@ _END;
               </span>
             </td>
             <td>
-              <input type="submit" class="flabel" value="Search">
+              <input type="submit" value="Search">
             </td>
+          </tr>
+          <tr>
+          <?php
+          // Searched manga index array
+          $sresult = [];
+          // Foreach Loop through all manga to count
+          for ($i = 0; $i < $xmldata->count(); $i++) { if (search($xmldata->comic[$i],$srch)) { $sresult[] = $i; } }
+          // Pagination condition
+          if (count($sresult) >= DISPLAY) {
+            echo "<td colspan=\"3\"><div id=\"pages\">";
+            // For loop to generate pages
+            for ($i = 1; $i <= ceil(count($sresult) / DISPLAY); $i++) {
+              // Identify current page
+              $fill = ($srch['page'] == $i)?"id=\"current\" disabled ":"";
+              echo "<input type=\"submit\" name=\"page\" value=\"" . $i . "\" " . $fill . "/> ";
+            }
+            echo "</div></td>";
+          }
+          ?>
           </tr>
         </table>
 	  </form>
@@ -286,32 +280,27 @@ _END;
       <table>
         <tr>
           <?php
-          // Empty table boolean
-          $empty_tbl = true;
-          // Single row boolean
-          $srow = true;
           // Count manga per row
           $rownum = 0;
-          // Count displayed manga
-          $mcount = 0;
-
-          // Foreach Loop through all manga to print/display
-          foreach ($xmldata->comic as $comic) {
-            if ($mcount < 24 && search($comic)) {
-              $rownum++;
-              // Manga line spacing conditions
-              if ($rownum > 3) {
-                echo "</tr>\n<tr>";
-                $rownum = 1;
-                $srow = false;
-              }
-              
-              // Extract all labels
-              $atags = explode(',',ucwords($comic->tags,","));
-              // Extract all comic/info info into JSON
-              $full = exp_json($comic,$atags);
-              
-              echo <<<_END
+          // Loop limit count
+          $limit = (DISPLAY*$srch['page'] <= count($sresult))?DISPLAY*$srch['page']:count($sresult);
+          
+          // For loop through all comics to print/display
+          for ($i = 0+DISPLAY*($srch['page']-1); $i < $limit; $i++) {
+          	$comic = $xmldata->comic[$sresult[$i]];
+            $rownum++;
+            // Manga line spacing conditions
+            if ($rownum > 3) {
+              echo "</tr>\n<tr>";
+              $rownum = 1;
+            }
+            
+            // Extract all labels
+            $tags = explode(',',ucwords($comic->tags,","));
+            // Extract all comic/info info into JSON
+            $full = exp_json($comic,$tags);
+            
+            echo <<<_END
                 <td class="ind_manga">
                 <div class="clickarea" onclick="openFullManga(this.firstElementChild); return false;">
                   <article>{$full}</article>
@@ -320,52 +309,48 @@ _END;
                 </div>
                 <div class="lbl_btm">
 _END;
-              // Count number of labels
-              $atags_count = count($atags);
-              // Count labels per line
-              $labelnum = 0;
-              // Cumulative labels variable
-              $tlabels = "";
+            // Count number of labels
+            $tags_count = count($tags);
+            // Count labels per line
+            $labelnum = 0;
+            // Cumulative labels variable
+            $tlabels = "";
 
-              // Foreach Loop through all labels to cumulate
-              foreach ($atags as $tag) {
-                // Identify label
-                $tlabels .= switch_label($tag,true);
+            // Foreach Loop through all labels to cumulate
+            foreach ($tags as $tag) {
+              // Identify label
+              $tlabels .= switch_label($tag,true);
 
-                $labelnum++;
-                // Labels line spacing condition
-                if ($atags_count > 0 && $labelnum >= 3) {
-                  $tlabels .= "</div>\n<div class=\"lbl_btm\">";
-                  $atags_count -= 3;
-                  $labelnum = 0;
-                }
+              $labelnum++;
+              // Labels line spacing condition
+              if ($tags_count > 0 && $labelnum >= 3) {
+                $tlabels .= "</div>\n<div class=\"lbl_btm\">";
+                $atags_count -= 3;
+                $labelnum = 0;
               }
-
-              // Close/print/display 'tlabels'
-              echo $tlabels . "</div>\n";
-              echo "<p class=\"ch_num\"><strong>Chapter: </strong>" . $comic->chapter . "</p>\n<table>";
-
-              // Cumulative list links variable
-              $links = "";
-              // Foreach Loop through all links to print/display
-              foreach ($comic->link as $clink) { $links .= "<tr>\n<td>\n<img src=\"" . switch_link($clink) . "\" alt=\"" . $clink['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $clink . "\" target=\"_blank\">" . $clink['site'] . "</a>\n</td>\n</tr>\n"; }
-              // Close/print/display 'links'
-              echo $links . "</table></td>";
-              
-              if (++$mcount >= 24) { $sid = $comic->attributes(); }
-              $empty_tbl = false;
             }
+
+            // Close/print/display 'tlabels'
+            echo $tlabels . "</div>\n";
+            echo "<p class=\"ch_num\"><strong>Chapter: </strong>" . $comic->chapter . "</p>\n<table>";
+
+            // Cumulative list links variable
+            $links = "";
+            // Foreach Loop through all links to print/display
+            foreach ($comic->link as $clink) { $links .= "<tr>\n<td>\n<img src=\"" . switch_link($clink) . "\" alt=\"" . $clink['site'] . "\" class=\"sicon\"/>\n<a href=\"" . $clink . "\" target=\"_blank\">" . $clink['site'] . "</a>\n</td>\n</tr>\n"; }
+            // Close/print/display 'links'
+            echo $links . "</table></td>";
           }
           
           // Close table list
-          if ($rownum < 4 && !$empty_tbl) {
-            if ($srow) {
+          if ($rownum < 4 && !empty($sresult)) {
+            if (count($sresult) <= 3) {
               for (; $rownum < 3; $rownum++) { echo "<td class=\"ind_manga\"></td>\n"; }
             }
             echo "</tr>\n";
           }
           // No result catch
-          if ($empty_tbl) { echo "<td id=\"empty\"><h3>No Results. Search for Something Else.</h3></td></tr>\n"; }
+          if (empty($sresult)) { echo "<td id=\"empty\"><h3>No Results. Search for Something Else.</h3></td></tr>\n"; }
           ?>
       </table>
     </section>
@@ -383,70 +368,6 @@ _END;
         </tr>
         <tr class="fm_links"></tr>
         <tr class="fm_links"></tr>
-        <?php
-        // Full detail to-display check
-        if (full) {
-          echo "<tr><td id=\"fm_poster\">\n";
-          // Foreach Loop through all manga to find specific manga and to print/display
-          foreach ($xmldata->comic as $comic) {
-            if ($comic['id'] == $id) {
-              echo <<<_END
-                <img src="{$comic->cover}" alt="{$comic->name}" class="poster"/>
-              </td>
-              <td colspan="2" id="fm_titles">
-                <strong>Primary Title:</strong> {$comic->name} <br>
-_END;
-              // Foreach Loop through all alternative manga titles/names to print/display
-              foreach ($comic->alt as $alts) { echo "<strong>Alternate Title:</strong> " . $alts . " <br>\n"; }
-              
-              // Extract all labels 
-              $atags = explode(',',ucwords($comic->tags,","));
-              // Cumulative labels variable
-              $tlabels = "";
-              // Foreach Loop through all labels to cumulate
-              foreach ($atags as $tag) { $tlabels .= switch_label($tag); }
-              echo <<<_END
-              </td>
-            </tr>
-            <tr>
-              <td colspan="3" id="fm_descriptors">
-                <br>
-                {$tlabels}
-                <br><br>
-                <p class="ch_num"><strong>Chapter: </strong>{$comic->chapter}</p>
-                <br>
-              </td>
-            </tr>
-_END;
-              // Cumulative list links variable
-              $links = "<tr class=\"fm_links\">";
-              // Count number of links
-              $link_count = $comic->link->count();
-              // Count links per row
-              $link_num = 0;
-              
-              // Foreach Loop through all links to print/display
-        	  foreach ($comic->link as $clink) {
-                // Identify link
-                $links .= switch_link($clink);
-                
-                $link_num++;
-                // Link line spacing conditions
-                if ($link_count > 3 && $link_num >= 3) {
-                  $links .= "</tr>\n<tr class=\"fm_links\">";
-                  $link_count -= 3;
-                  $link_num = 0;
-                }
-                else if ($link_count <= 3 && $link_count == $link_num) {
-                  for (; $link_num < 3; $link_num++) { $links .= "<td></td>\n"; }
-                  echo $links . "</tr>\n";
-                }
-              }
-              break;
-            }
-          }
-        }
-        ?>
         </table>
     </div>
     <!--Website Footer-->
