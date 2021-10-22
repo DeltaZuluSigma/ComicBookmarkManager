@@ -19,6 +19,10 @@ table {
 form table td {
 	padding: 0px 15px 0px 15px;
 }
+input[name='page'] {
+  	border-radius: .4rem;
+  	border: 1px solid #000;
+}
 .jumbotron {
 	padding: 15px;
 	text-align: center;
@@ -70,6 +74,13 @@ form table td {
 .fm_links td {
   	width: 33%;
   	text-align: center;
+}
+#pages {
+  	margin-top: 10px;
+  	text-align: center;
+}
+#current {
+  background-color: #ededed;
 }
 #full_manga {
 	left: 0px;
