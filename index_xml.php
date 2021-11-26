@@ -1,6 +1,7 @@
 <?php
 // Extract XML file
-$xmldata = simplexml_load_file("files/bookmarks.xml") or die("Failed to load");
+$xmldata = simplexml_load_file("files/bookmarks.xml") or die("Failed to load bookmarks.");
+$sitesdata = simplexml_load_file("files/sites.xml") or die("Failed to load sites.");
 
 // Constants
 define("DISPLAY",24);
@@ -64,37 +65,16 @@ function switch_label($tag,$opt) {
 /**switch_link Function**************************************************
    Desc: Makes the link & favicon switch structure more accessible/modular
    Param: link - Link XML element
-   Return: respective HTML link & favicon elements
+   Return: respective favicon link / location
 */
 function switch_link($link) {
-  switch ($link['site']) {
-    case "MangaDex": return "css/images/md_favicon.ico";
-    case "Manga Sushi": return "https://mangasushi.net/wp-content/uploads/2020/11/cropped-MS_LOGO-32x32.png";
-    case "Luminous Scans": return "https://www.luminousscans.com/fypadsuh/2021/04/cropped-logo-32x32.png";
-    case "MangaKakalot": return "https://mangakakalot.com/favicon.ico";
-    case "Bato.To": return "https://static.animemark.com/img/batoto/favicon.ico?v0";
-    case "WhimSubs": return "https://whimsubs.xyz/static/img/logo.png";
-    case "LHTranslation": return "css/images/lht_favicon.ico";
-    case "Manganato": return "https://readmanganato.com/favicon.png";
-    case "ManhuaPlus": return "https://manhuaplus.com/wp-content/uploads/2020/07/cropped-manhua-vuong-den-1-32x32.jpg";
-    case "Flame Scans": return "https://flamescans.org/eternalflame/2021/03/cropped-fds-1-32x32.png";
-    case "Reaper Scans": return "css/images/rs_favicon.png";
-    case "1st Kiss Manga": return "css/images/1km_favicon.png";
-    case "Asura Scans": return "https://www.asurascans.com/wp-content/uploads/2021/03/cropped-Group_1-1-32x32.png";
-    case "Nani? Scans": return "css/images/ns_favicon.png";
-    case "Tritinia Scans": return "css/images/ts_favicon.png";
-    case "247 Manga": return "https://247manga.com/wp-content/uploads/2021/05/cropped-247manga-32x32.png";
-    case "Kun Manga": return "https://kunmanga.com/wp-content/uploads/2021/06/cropped-kun-favicon-32x32.png";
-    case "Immortal Updates": return "https://immortalupdates.com/wp-content/uploads/2017/10/SMALL-LOGO.png";
-    case "Gourmet Scans": return "css/images/gs_favicon.png";
-    case "Reset Scans": return "css/images/res_favicon.png";
-    case "Isekai Scan": return "css/images/is_favicon.png";
-    case "Manga Great": return "css/images/mg_favicon.png";
-    case "Galaxy Degen Scans": return "https://gdegenscans.xyz/wp-content/uploads/2021/03/cropped-favicon-32x32.png";
-    case "Cat Manga": return "https://images.catmanga.org/favicon.png";
-    case "WordPress": return "https://s0.wp.com/i/favicon.ico";
-    default: return "css/images/not-available.png";
+  global $sitesdata;
+  for ($i = 1; $i < $sitesdata->count(); $i++) {
+    if ((string)$link['site'] == (string)$sitesdata->site[$i]['name']) {
+      return $sitesdata->site[$i];
+    }
   }
+  return $sitesdata->site[0];
 }
 /**search Function*******************************************************
    Desc: Apply the search filters accordingly to each comic/manga
@@ -136,6 +116,7 @@ function search($comic,$srch) {
    Return: JSON string
 */
 function exp_json($comic,$tags) {
+  global $sitesdata;
   // Titles
   $all = "{\"name\":[\"" . $comic->name . "\"";
   foreach ($comic->alt as $alt) { $all .= ",\"" . $alt . "\""; }
@@ -171,6 +152,7 @@ function exp_json($comic,$tags) {
     <header class="jumbotron">
       <img src="css/images/favicon.ico" alt="logo" id="logo">
       <h1>Manga Bookmarks</h1>
+      <button onclick="location.href='html/edit_xml.php?index=-1'; return false;" class="btn-sm btn-warning">Add Manga</button>
     </header>
 	<nav>
       <!--Bookmark Search Form-->
