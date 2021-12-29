@@ -1,7 +1,7 @@
 # ComicBookmarkManager
-A website to organize your bookmarks (comics) by tags rather than folders; this was made in part to circumvent Cross-Origin Resource Sharing (CORS) such that a website can read and write to and from an XML file.
+A website to organize your comics (manga, manhwa, etc.) by tags rather than folders. Repurposable to simply organize bookmarks/links by tag instead of folder.
 
-Version: x0.5
+Version: x0.6
 
 ## Features
 - [x] Display bookmarks stored via XML (works for files under 110KB)
@@ -10,8 +10,10 @@ Version: x0.5
 - [x] Bookmark tag sorting
 - [x] Saved search
 - [x] Pages / Pagination
-- [ ] Editable bookmarks
+- [x] Editable bookmarks
 - [ ] SQL website version for more storage
+- [ ] Export as Chrome bookmark xhtml file
+- [ ] Abstract demo version
 - [ ] Comic/Manga site scrapper (most likely not)
 
 ## Feature Explaination
