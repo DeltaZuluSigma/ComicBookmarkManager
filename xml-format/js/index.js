@@ -20,7 +20,7 @@ function openFullManga(ele) {
         default: hold += "<span class=\"maturity_label\">" + t.tag + "</span> "; break;
       }
     }
-  	popupedit.innerHTML = "<br>" + hold + "<br><br><p><strong>Chapter: </strong>" + data.chapter + "</p><br>";
+  	popupedit.innerHTML = "<br>" + hold + "<br><button onclick='location.href=\"html/edit_xml.php?index=" + data.index + "\"; return false;' class='btn-sm btn-warning' style='float:right;'>Edit Manga</button><br><p><strong>Chapter: </strong>" + data.chapter + "</p><br>";
   	// Links
   	hold = "";
   	const row = 3;

@@ -9,15 +9,13 @@ $mlock = (filesize("../files/bookmarks.xml") < 116000)?"":"title='Too many bookm
 $slock = (filesize("../files/sites.xml") < 116000)?"":"title='Too many sites.' disabled";
 // SET/VALID FORM DATA CONDITIONS **************************************************
 // Set edit condition
-if (isset($_GET['index']) && !empty($_GET['index']) && ($idx=$_GET['index']) >= 0) { $comic = $xmldata->comic[$idx]; }
+if (isset($_GET['index']) && ($idx=intval($_GET['index'])) >= 0) { $comic = $xmldata->comic[$idx]; }
 // Add/edit information conditions
 if (isset($_POST['header']) && !empty($_POST['header'])) {
   $head = $_POST['header'];
   switch($head) {
     case "editmanga":			// "Edit Manga" Form Data
-      break;
-    case "removemanga":			// "Remove Manga" Form Data
-      break;
+      if (isset($_POST['old']) && !empty($_POST['old'])) { $oldcover = true; }
     case "addmanga":			// "Add Manga" Form Data
       // Primary Name Condition
       if (isset($_POST['mname']) && !empty($_POST['mname'])) { $primaryname = $_POST['mname']; }
@@ -54,6 +52,7 @@ if (isset($_POST['header']) && !empty($_POST['header'])) {
         $linkpair = array_values($_POST['links']);
       }
       break;
+    case "removemanga": break;
     case "addsite":			// "Add Site" Form Data
       // Manga Site Name Condition
       if (isset($_POST['assos_site']) && !empty($_POST['assos_site'])) { $ascsite = $_POST['assos_site']; }
@@ -103,8 +102,48 @@ function buildfile($name) {
 */
 switch ($head) {
   case "editmanga":			// "Edit Manga" Operation
+    if (!isset($oldcover) && !(isset($urlcover) || (isset($fcrslt) && $fcrslt != "error"))) {
+      $alert = -1;
+    }
+    else if (isset($oldcover) || isset($urlcover) || (isset($fcrslt) && $fcrslt != "error")) {
+      $comic->name = $primaryname;
+      for ($i = 0; $i < count($altnames); $i++) {
+        if (isset($comic->alt[$i])) { $comic->alt[$i] = $altnames[$i]; }
+        else { $comic->addChild('alt',$altnames[$i]); }
+      }
+      $ctags = "";
+      foreach ($gtags as $tag) { $ctags .= $tag . ","; }
+      if ($mtag !== null) { $ctags .= $mtag . ","; }
+      if ($review) { $ctags .= "reviewing,"; }
+      $ctags .= $stag;
+      $comic->tags = $ctags;
+      $comic->chapter = $chapter;
+      if (!$oldcover && isset($urlcover)) { $comic->cover = $urlcover; }
+      else if (!$oldcover && isset($fcrslt)) { $comic->cover = $fcrslt; }
+      for ($i = 0; $i < count($sitepair); $i++) {
+        if (isset($comic->link[$i])) {
+          $comic->link[$i] = $linkpair[$i];
+          $comic->link[$i]['site'] = $sitepair[$i];
+        }
+        else {
+          $templink = $comic->addChild('link',$linkpair[$i]);
+          $templink->addAttribute('site',$sitepair[$i]);
+        }
+        
+        $alert = 4;
+        $xmldata->asXML('../files/xtemp.xml');
+        unset($ctags);
+        unset($templink);
+      }
+    }
+    else {
+      $alert = -1;
+    }
     break;
   case "removemanga":		// "Remove Manga" Operation
+    unset($xmldata->comic[$idx]);
+    $xmldata->asXML('../files/xtemp.xml');
+    $alert = 5;
     break;
   case "addmanga":			// "Add Manga" Operation
     if (isset($urlcover) || (isset($fcrslt) && $fcrslt != "error")) {
@@ -191,6 +230,8 @@ switch ($head) {
       case 1: $alertele .= "Manga successfully added and saved."; break;
       case 2: $alertele .= "Manga site successfully added and saved."; break;
       case 3: $alertele .= "Manga site successfully removed and saved."; break;
+      case 4: $alertele .= "Manga successfully edited and saved."; break;
+      case 5: $alertele .= "Manga successfully removed and saved."; break;
       case -1: $alertele .= "<h5>File Error</h5>A file with an invalid file type was uploaded as a manga cover."; break;
       case -2: $alertele .= "<h5>Duplicate Manga Site</h5>An existing manga site name was used, please use a unique manga site name. Delete and readd a manga site to edit an manga site."; break;
       case -3: $alertele .= "<h5>File Error</h5>A file with an invalid file type was uploaded as a manga site's icon."; break;
@@ -201,22 +242,149 @@ switch ($head) {
     ?>
     <!--Website Head-->
     <header class="jumbotron">
-      <table><tr><td>
-      		<a href="../index_xml.php"><img src="../css/images/favicon.ico" alt="logo" id="logo"></a>
+      <a href="../index_xml.php" class="lhide"><table><tr><td>
+      		<img src="../css/images/favicon.ico" alt="logo" id="logo">
           </td>
           <td>
             <h1>Manga Bookmark Editor</h1>
-      </td></tr></table>
+      </td></tr></table></a>
     </header>
     <!--Website Body • Form Editor-->
     <section>
       <?php
       if ($idx !== null && $idx >= 0) { // Edit Manga Condition
-        echo "edit";
+        // Set 'present_cum_alts'
+        if ($comic->alt->count() > 0) {
+          $present_cum_alts = "<span>Alternative Manga Name(s)</span><br>\n<label>Other searchable manga names.</label>\n";
+          foreach ($comic->alt as $copy_calt) {
+            $present_cum_alts .= "<input type='text' class='form-control form-control-sm space' name='altname[]' value='" . $copy_calt . "' />\n";
+          }
+        }
+        // Populate 'chk_tags'
+        $tags = explode(',',$comic->tags);
+        $chk_tags = [3 => "checked",7 => "checked"];
+        foreach ($tags as $t) {
+          switch ($t) {
+            case "casual": $chk_tags[0] = "checked"; break;
+            case "adventure": $chk_tags[1] = "checked"; break;
+            case "romance": $chk_tags[2] = "checked"; break;
+            case "suggestive":
+              $chk_tags[3] = $chk_tags[5] = "";
+              $chk_tags[4] = "checked";
+              break;
+            case "erotic":
+              $chk_tags[3] = $chk_tags[4] = "";
+              $chk_tags[5] = "checked";
+              break;
+            case "reviewing": $chk_tags[6] = "checked"; break;
+            case "new":
+              $chk_tags[7] = $chk_tags[9] = $chk_tags[10] = $chk_tags[11] = "";
+              $chk_tags[8] = "checked";
+              break;
+            case "reading":
+              $chk_tags[7] = $chk_tags[8] = $chk_tags[10] = $chk_tags[11] = "";
+              $chk_tags[9] = "checked";
+              break;
+            case "paused":
+              $chk_tags[7] = $chk_tags[9] = $chk_tags[8] = $chk_tags[11] = "";
+              $chk_tags[10] = "checked";
+              break;
+            case "mia":
+              $chk_tags[7] = $chk_tags[9] = $chk_tags[10] = $chk_tags[8] = "";
+              $chk_tags[11] = "checked";
+              break;
+          }
+        }
+        // Set 'present_cum_links'
+        if ($comic->link->count() > 1) {
+          $present_cum_links = "";
+          for ($i = 1; $i < $comic->link->count(); $i++) {
+            $present_cum_links .= "<div class='link_pair'>\n<input type='text' class='form-control form-control-sm' name='sites[]' placeholder='Associated Manga Site' value='" .$comic->link[$i]['site']. "' />\n<input type='url' class='form-control form-control-sm' name='links[]' placeholder='https://' value='" .$comic->link[$i]. "' />\n</div>\n";
+          }
+        }
+        echo <<<_END
+        <h5>Edit Manga</h5>
+        <div class="ctnr">
+          <form method="post" enctype='multipart/form-data'>
+            <input type="hidden" name="header" value="editmanga" />
+            <div>
+              <h6>Manga Titles</h6>
+              <span>Primary Manga Name</span>
+              <input type="text" id="primary_mname" class="form-control form-control-sm" name="mname" value="{$comic->name}" required />
+              <label for="primary_mname">The displayed name for the manga.</label><br>
+              {$present_cum_alts}
+              <a href="#" id="add_alt">Add Alternative Manga Name</a>
+            </div>
+            <br>
+            <div>
+              <h6>Tags</h6>
+              <label>How the manga will be organized.</label>
+              <div id="ctr_ctnr">
+              	<div>
+                  <span>Genre Tags:</span>
+                  <input type="checkbox" name="gtags[]" value="casual" {$chk_tags[0]} /> <span class="genre_label">Casual</span>
+                  <input type="checkbox" name="gtags[]" value="adventure" {$chk_tags[1]} /> <span class="genre_label">Adventure</span>
+                  <input type="checkbox" name="gtags[]" value="romance" {$chk_tags[2]} /> <span class="genre_label">Romance</span>
+                </div>
+                <div>
+                  <span>Maturity Tags:</span>
+                  <input type="radio" name="mtag" value="none" {$chk_tags[3]} />  <span>None</span>
+                  <input type="radio" name="mtag" value="suggestive" {$chk_tags[4]} /> <span class="maturity_label">Suggestive</span>
+                  <input type="radio" name="mtag" value="erotic" {$chk_tags[5]} /> <span class="maturity_label">Erotic</span>
+                </div>
+                <span>Status Tags:</span>
+                <input type="checkbox" name="stags_opt" value="reviewing" {$chk_tags[6]} /> <span class="status_label">Reviewing</span>
+                <input type="radio" name="stags" value="none" {$chk_tags[7]} /> <span>None</span>
+                <input type="radio" name="stags" value="new" {$chk_tags[8]} /> <span class="status_label">New</span>
+                <input type="radio" name="stags" value="reading" {$chk_tags[9]} /> <span class="status_label">Reading</span>
+                <input type="radio" name="stags" value="paused" {$chk_tags[10]} /> <span class="status_label">Paused</span>
+                <input type="radio" name="stags" value="mia" {$chk_tags[11]} /> <span class="status_label">MIA</span>
+              </div>
+            </div>
+            <br>
+            <div>
+              <h6>Chapter Number</h6>
+              <input type="number" class="form-control form-control-sm" name="chapter" value="{$comic->chapter}" min="1" required />
+              <label>The latest chapter read.</label>
+            </div>
+            <br>
+            <div id="cvr_ctnr">
+              <h6>Manga Cover</h6>
+              <input type="url" class="form-control form-control-sm" name="cover" placeholder="https://" disabled />
+              <label>The cover / poster image for the manga. Do you want to upload a: <span>link / <a href="#">image</a></span></label>
+              <div id="cvropt">
+              	<code>{$comic->cover}</code><br>
+                <img src="{$comic->cover}" alt="{$comic->name}" /><br>
+                <input type="checkbox" name="old" value="yes" checked /> <span>Use the old cover.</span>
+              </div>
+            </div>
+            <br>
+            <div>
+              <h6>Manga Links</h6>
+              <div class="link_pair">
+                <input type="text" class="form-control form-control-sm" name="sites[]" value="{$comic->link[0]['site']}" required />
+                <input type="url" class="form-control form-control-sm" name="links[]" value="{$comic->link[0]}" required />
+              </div>
+              {$present_cum_links}
+              <a href="#" id="add_link">Add More Links</a>
+            </div>
+            <br>
+            <input type="submit" value="Edit Manga" />
+          </form>
+        </div>
+        <br>
+        <h5>Remove Selected Manga</h5>
+        <div class="ctnr trim">
+          <form method="post">
+            <input type="hidden" name="header" value="removemanga" />
+            <input type="submit" class="remove" value="Remove Manga" />
+          </form>
+        </div>
+_END;
       }
       else if ($idx < 0) { // Add New Manga Condition
         echo <<<_END
-        <h5>Add New Manga / Comic</h5>
+        <h5>Add New Manga</h5>
         <div class="ctnr">
           <form method="post" enctype='multipart/form-data'>
             <input type="hidden" name="header" value="addmanga" />
@@ -304,7 +472,7 @@ switch ($head) {
             <input type="text" class="form-control form-control-sm" name="remove" required />
             <label>The respective manga site name to be removed. Note that this is <u>case-sensitive</u>.</label>
             <br>
-            <input type="submit" value="Remove Manga Site" class="rmasp" />
+            <input type="submit" value="Remove Manga Site" class="remove" />
           </form>
         </div>
   _END;

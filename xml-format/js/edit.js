@@ -20,7 +20,7 @@ $(document).ready(function(){
     });
   	/***Toggle Cover Format Function***/
   	$('#cvr_ctnr').on("click", "a", function() {
-      	var slt = $('#cvr_ctnr input');
+      	var slt = $('#cvr_ctnr input[name="cover"]');
       	if(slt.attr('type') == 'file') {
           	slt.attr('placeholder', 'https://');
           	slt.attr('class', 'form-control form-control-sm');
@@ -50,7 +50,16 @@ $(document).ready(function(){
           	$(this).parent().html("<a href='#'>link</a> / image");
         }
     });
-  	/*$('#tgl_cvr')
-  	$('#add_link')
-  	$('#tgl_icon')*/
+  	/***Toggle Old Cover Function***/
+  	$("[name='old']").change(function(){
+      	var f = $("[name='cover']");
+      	if ($(this).is(':checked')) {
+        	f.prop("required",false);
+        	f.prop("disabled",true);
+      	}
+      	else {
+        	f.prop("required",true);
+        	f.prop("disabled",false);
+      	}
+    });
 });

@@ -115,10 +115,10 @@ function search($comic,$srch) {
    Param: A comic object
    Return: JSON string
 */
-function exp_json($comic,$tags) {
+function exp_json($idx,$comic,$tags) {
   global $sitesdata;
   // Titles
-  $all = "{\"name\":[\"" . $comic->name . "\"";
+  $all = "{\"index\":" . $idx . ",\"name\":[\"" . $comic->name . "\"";
   foreach ($comic->alt as $alt) { $all .= ",\"" . $alt . "\""; }
   // Tags
   $all .= "],\"tag\":[";
@@ -280,7 +280,7 @@ _END;
             // Extract all labels
             $tags = explode(',',ucwords($comic->tags,","));
             // Extract all comic/info info into JSON
-            $full = exp_json($comic,$tags);
+            $full = exp_json($sresult[$i],$comic,$tags);
             
             echo <<<_END
                 <td class="ind_manga">
