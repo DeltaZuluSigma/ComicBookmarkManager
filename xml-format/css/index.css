@@ -35,7 +35,7 @@ input[name='page'] {
 	margin-bottom: 5px;
 }
 .ind_manga {
-  	padding: 15px 30px 15px 30px;
+  	padding: 15px 30px;
   	width: 350px;
 	text-align: center;
 }
@@ -45,16 +45,17 @@ input[name='page'] {
 .ind_manga article {
   	display: none;
 }
-.clickarea {
+.click_area {
   	cursor: pointer;
 }
 .poster {
 	width: 200px;
   	height: 300px;
 }
-.sicon {
-	width: 15px;
-  	height: 15px;
+.icon {
+	width: 18px;
+  	height: 18px;
+  	transform: translateY(-13%);
 }
 .genre_label, .maturity_label, .status_label {
 	border-radius: .25rem;
@@ -70,7 +71,7 @@ input[name='page'] {
 .status_label {
   	background-color: #bbf25c;
 }
-.lbl_btm {
+.label_ctnr {
 	margin-bottom: 10px;
 }
 .ch_num {
